@@ -1,31 +1,28 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import "./App.css";
 import { config } from "./constants";
 
-import { chartData$, useChartData } from "./hooks/useChartData";
-
-import { Quote } from "./types";
+import { getChartData$ } from "./utils/getChartData";
 import { connect } from "./utils/socketConnect";
 
 function App() {
-  const [quote, setQuote] = useState<Quote[]>();
-  const [chartData, setChartData] = useState<Quote[]>();
+  // const [quote, setQuote] = useState<Quote[]>();
+  // const [chartData, setChartData] = useState<Quote[]>();
   const socket$ = connect(config);
 
-  useChartData(config);
-
   useEffect(() => {
-    const sub = socket$.subscribe((val) => {
+    const sock = socket$.subscribe((val) => {
       console.log(val);
     });
 
-    return () => sub.unsubscribe();
+    return () => sock.unsubscribe();
   }, [socket$]);
 
   useEffect(() => {
-    const sub = chartData$.subscribe(setChartData);
-
-    return () => sub.unsubscribe();
+    getChartData$(config).subscribe({
+      next: (value) => console.log(value),
+      error: (err) => console.log(err),
+    });
   }, []);
 
   return <div className="App">Data</div>;
